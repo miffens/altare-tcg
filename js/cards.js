@@ -234,6 +234,12 @@ export function updateGachaView(e) {
       .getElementById("pull-announcement")
       .classList.remove("visually-hidden");
   }
+
+
+  // show the open all button if grid, mobile and opened once
+  if(GACHA_SECTION.classList.contains("pulled")){
+    toggleOpenAllButton();
+  }
 }
 export function updateGachaMotion() {
   // get the list of cards
@@ -327,6 +333,52 @@ export function addUnclickableToCardsExceptLast() {
     }
   }
 }
+function toggleOpenAllButton() {
+  // if the current layout is a grid, there has been at least one pull, and the screen size only allows 1 card width
+  // then show the open all button, otherwise keep it hidden
+  if(document.getElementById("gacha-grid").checked && innerWidth < 810){
+    document.getElementById("card-list").style.paddingTop = "50px";
+    document.getElementById("gacha-open-all").classList.remove("hidden");
+  } else {
+    document.getElementById("card-list").style.paddingTop = "30px";
+    document.getElementById("gacha-open-all").classList.add("hidden");
+  }
+}
+
+function openAllCards(){
+  let allCardsOpened = "";
+  let cardList = document.getElementsByClassName("card-component");
+  document.getElementById("gacha-open-all").classList.add("hidden");
+  for (let i = 0; i < cardList.length; i++) {
+    // parent element
+    cardList[i].parentElement.classList.add("clicked");
+    cardList[i].parentElement.style.zIndex = card_z_index;
+    card_z_index++;
+    // card component
+    cardList[i].classList.add("flip");
+    // front
+    // we do not need to read all of the fronts, so not changing anything
+    // back
+    cardList[i].getElementsByClassName("card-back")[0].tabIndex = "-1";
+    cardList[i].getElementsByClassName("card-back")[0].setAttribute("aria-hidden", "true");
+    // image
+    cardList[i].getElementsByClassName("card-image")[0].classList.add("opened");
+    // subtitle
+    cardList[i].parentElement.getElementsByClassName("card-subtitle")[0].classList.remove("hidden");
+    allCardsOpened += "Card " + (i + 1) + ": "
+    allCardsOpened += cardList[i].parentElement.getElementsByClassName("card-subtitle")[0].innerHTML
+    if(i < (cardList.length - 1)){
+      allCardsOpened += ", ";
+    } else {
+      allCardsOpened += ".";
+    }
+  }
+  // hide the button and fix the section height
+  document.getElementById("gacha-prompt-roll-again").classList.remove("hidden");
+  document.getElementById("card-list").style.paddingTop = "30px";
+  // have screenreader announce the card names of all cards
+  document.getElementById("pull-announcement").textContent = allCardsOpened;
+}
 
 //Renders a list of cards in the element specified in htmlLocation.
 //If replace is true, overwrites all elements inside htmlLocation.
@@ -341,6 +393,8 @@ export function renderCards(cards, htmlLocation, replace = false) {
       // reset the subtitle in the pile display
       document.getElementById("pull-announcement").textContent = "";
       document.getElementById("gacha-controls").classList.add("pulled");
+      // add the button
+      htmlLocation.innerHTML = '<div id="gacha-open-all" class="hidden"><button id="open-all-cards">Open All Cards</button></div>';
     }
   }
   for (let i = 0; i < cards.length; i++) {
@@ -356,6 +410,10 @@ export function renderCards(cards, htmlLocation, replace = false) {
   if (document.getElementById("gacha-controls") !== null) {
     // update the motion settings based on the checkbox
     updateGachaMotion();
+    document.getElementById("gacha-open-all").addEventListener("click", openAllCards);
+
+    // show the Open All if card grid 
+    toggleOpenAllButton();
   }
 }
 

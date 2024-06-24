@@ -93,7 +93,7 @@ tcg-card {
   /* this is added as a hack/fix for the variable height of the gacha section tag
   after content is inserted into the pull announcement after first pull,
   this causes the height to suddenly change from 0 to roughly 19.something */
-  height: 1em;
+  min-height: 1em;
 }
 
 /* rotate card differently depending on its position in the pile */
@@ -684,6 +684,12 @@ section#gacha-controls fieldset:nth-child(3) {
 
 .spacer {
   display: none;
+}
+
+#gacha-open-all {
+  position: absolute;
+  top: 0px;
+  left: 0px;
 }
 
 @media screen and (max-width: 860px) {
